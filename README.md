@@ -334,6 +334,41 @@ Any ComfyUI works as the backend: run `comfy-api-proxy` next to it and `python i
 too; only the unload-between-apps step is skipped. An app marked `draft` (none is, today) stays locked in the UI and
 the CLI until you set `FREEFIELD_DRAFTS=1` (or pass `--draft` to `npm run app`).
 
+### For AI agents: MCP server
+
+Freefield includes an MCP server so any MCP-capable agent (OpenCode, Claude Code, Cursor, etc.) can drive the apps directly.
+
+```sh
+# 1. Start the HTTP API (in one terminal)
+npm run serve                         # http://127.0.0.1:3000
+
+# 2. Register the MCP server (once, per project)
+opencode mcp add freefield --env FREEFIELD_URL=http://127.0.0.1:3000 -- npm run mcp
+# or globally: opencode mcp add freefield --global --env FREEFIELD_URL=... -- npm run mcp
+```
+
+The project already has `opencode.json` checked in with the server registered, so opening this repo in OpenCode connects it automatically.
+
+**Tools exposed:**
+
+| Tool | Description |
+|------|-------------|
+| `freefield_list_apps` | Catalog with models, VRAM verdicts; filter by section (image/video/audio/utility) |
+| `freefield_get_app` | Full input schema: types, options, defaults, presets, lab example |
+| `freefield_run_app` | Run an app (file inputs = local path); polls to completion; saves outputs to `out/mcp/<run-id>/`; **returns images as image content blocks** |
+| `freefield_get_run` | Status, live progress (step/steps, current node), outputs, error |
+| `freefield_list_runs` | Recent runs, optionally filtered by app |
+| `freefield_save_run_file` | Re-download an output file to a local path |
+| `freefield_gpu_status` / `freefield_gpu_wake` | GPU warm state + VRAM in use; pre-warm while writing a prompt |
+
+Example agent flow:
+
+```
+list_apps → get_app(z-image) → run_app(z-image, { prompt: "a red bike", width: 1280 }) → agent sees the generated image
+```
+
+The server is in `server/mcp.ts` (Node, no framework, ~250 lines). Tests in `test/mcp.test.ts` run in CI without a GPU.
+
 ## The LoRA lab and the gallery
 
 `lab/cases.json` lists experiments: reference images, clips and a song are generated first, then every app and LoRA
