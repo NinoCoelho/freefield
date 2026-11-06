@@ -14,10 +14,12 @@
     "app": "node --env-file-if-exists=.env --experimental-strip-types --disable-warning=ExperimentalWarning server/cli.ts app",
     "serve": "node --env-file-if-exists=.env --experimental-strip-types --disable-warning=ExperimentalWarning server/server.ts",
     "test": "node --experimental-strip-types --disable-warning=ExperimentalWarning --test test/*.test.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "mcp": "node --experimental-strip-types --disable-warning=ExperimentalWarning server/mcp.ts"
   },
   "dependencies": {
     "@comfyorg/sdk": "0.5.0",
+    "@modelcontextprotocol/sdk": "^1.0.0",
     "ajv": "^8.20.0"
   },
   "devDependencies": {
