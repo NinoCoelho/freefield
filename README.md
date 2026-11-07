@@ -367,6 +367,16 @@ Example agent flow:
 list_apps → get_app(z-image) → run_app(z-image, { prompt: "a red bike", width: 1280 }) → agent sees the generated image
 ```
 
+`FREEFIELD_URL` is the Node server (`npm run serve`), not the ComfyUI backend: runs go to the same backend the web UI
+uses, whatever `COMFY_BASE_URL` in `.env` says — the Modal deployment or the local backend (`http://127.0.0.1:8000`).
+The Node server attaches the gateway's bearer token (`FREEFIELD_TOKEN` in `.env`) itself, so the agent never holds it;
+other MCP clients reach the server over http://127.0.0.1:3000 with no credentials.
+
+On Modal the GPU scales down shortly after the last request (`scaledown_window` in `infra/modal_app.py`), so a run
+after a pause pays a cold start. `freefield_gpu_status` is the cheap check (hitting the cold container for it is
+fine), and `freefield_gpu_wake` boots it while the agent is still preparing inputs — call it as soon as `run_app`
+becomes likely, not when the workflow is ready to send.
+
 The server is in `server/mcp.ts` (Node, no framework, ~250 lines). Tests in `test/mcp.test.ts` run in CI without a GPU.
 
 ## The LoRA lab and the gallery
