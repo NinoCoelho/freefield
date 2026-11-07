@@ -56,7 +56,7 @@ def download(pack: str) -> dict:
     volumes={"/models": models_volume},
     secrets=[freefield_secret],
     timeout=24 * 3600,
-    scaledown_window=600,      # stays warm 10 min after the last request
+    scaledown_window=120,      # stays warm 2 min after the last request (was 600)
     max_containers=1,          # one ComfyUI owns the GPU; the gateway queues the rest
 )
 @modal.concurrent(max_inputs=64)
